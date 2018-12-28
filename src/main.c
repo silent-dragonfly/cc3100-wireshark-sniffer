@@ -196,9 +196,6 @@ void SimpleLinkSockEventHandler(SlSockEvent_t *pSock) {
  * ASYNCHRONOUS EVENT HANDLERS -- End
  */
 
-/*
- * Application's entry point
- */
 int main(int argc, char** argv) {
 	_i32 retVal = -1;
 
@@ -445,98 +442,3 @@ void Sniffer(_i16 channel) {
 	sl_Close(SockID);
 }
 
-/*!
- \brief Entering raw Transmitter\Receiver mode in order to send raw data
- over the WLAN PHY
-
- This function shows how to send raw data, in this case ping packets over
- the air in transmitter mode.
-
- \param[in]      Channel number on which the data will be sent
-
- \return         0 on success, Negative on Error.
-
- \note
-
- \warning        We must be disconnected from WLAN AP in order to succeed
- changing to transmitter mode
- */
-//static _i32 RxEvaluation(_i16 channel) {
-//	_i16 SockID = 0;
-//	_i32 Status = 0;
-//	_u16 Len = 0;
-//	_i16 count = 0;
-//
-//	/*
-//	 * Disconnect previous connection if any
-//	 * The function returns 0 if 'Disconnected done', negative number if already disconnected
-//	 * Wait for 'disconnection' event if 0 is returned, Ignore other return-codes
-//	 */
-//	Status = sl_WlanDisconnect();
-//	if (0 == Status) {
-//		/* Wait */
-//		while (IS_CONNECTED(g_Status)) {
-//			Delay(300);
-//		}
-//	}
-//
-//	/* make sure device is disconnected & auto mode is off */
-//	SockID = sl_Socket(SL_AF_RF, SL_SOCK_RAW, channel);
-//	ASSERT_ON_ERROR(SockID);
-//
-////    Changing rate is not affect for receiving
-////    _u32 rate = RATE;
-////    Status = sl_SetSockOpt(SockID, SL_SOL_PHY_OPT, SL_SO_PHY_RATE, &rate, sizeof(rate));
-////    assert(Status == 0);
-//
-//	_u32 preamble = PREAMBLE;
-//	Status = sl_SetSockOpt(SockID, SL_SOL_PHY_OPT, SL_SO_PHY_PREAMBLE,
-//			&preamble, sizeof(preamble));
-//	assert(Status == 0);
-//
-//	Len = sizeof(RawData_Ping);
-//
-//	_u8 buffer[MAX_PACKET_SIZE];
-//
-//	SlTransceiverRxOverHead_t *rxHeader = buffer;
-//	FrameControl *fc = buffer + sizeof(SlTransceiverRxOverHead_t);
-//
-//	while (TRUE) {
-//		Status = sl_Recv(SockID, buffer, MAX_PACKET_SIZE, 0);
-//
-//		if (Status < 0) {
-//			DEBUG("Broken socket. Exiting...");
-//			sl_Close(SockID);
-//			return -1;
-//		}
-//
-//		if (fc->ProtocolVersion != 0) {
-//			DEBUG("[MAGIC] Protocol version is not a zero!!!!!!!!");
-//			continue;
-//		}
-//
-//		if (fc->Type != TYPE_DATA) {
-//			continue;
-//		}
-//
-//		if (fc->Subtype != DATA_SUBTYPE_QOS) {
-//			continue;
-//		}
-//
-//		if (memcmp(&(RawData_Ping[DEST_MAC_OFFSET]),
-//				&(buffer[sizeof(SlTransceiverRxOverHead_t) + DEST_MAC_OFFSET]),
-//				6) != 0) {
-//			continue;
-//		}
-//
-//		DEBUG("[%lu]Recv: %d bytes; ch %u; rate: %u; rssi %d",
-//				rxHeader->timestamp, Status, rxHeader->channel, rxHeader->rate,
-//				rxHeader->rssi);
-//
-//	}
-//
-//	Status = sl_Close(SockID);
-//	ASSERT_ON_ERROR(Status);
-//
-//	return SUCCESS;
-//}
