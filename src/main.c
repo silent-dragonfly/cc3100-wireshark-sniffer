@@ -46,10 +46,10 @@ typedef struct wireSharkGlobalHeader_t {
 } wireSharkGlobalHeader_t;
 
 typedef struct pcaprec_hdr_s {
-        uint32_t ts_sec;         /* timestamp seconds */
-        uint32_t ts_usec;        /* timestamp microseconds */
-        uint32_t incl_len;       /* number of octets of packet saved in file */
-        uint32_t orig_len;       /* actual length of packet */
+	uint32_t ts_sec; /* timestamp seconds */
+	uint32_t ts_usec; /* timestamp microseconds */
+	uint32_t incl_len; /* number of octets of packet saved in file */
+	uint32_t orig_len; /* actual length of packet */
 } pcaprec_hdr_t;
 
 // http://www.radiotap.org/
@@ -230,11 +230,33 @@ int main(int argc, char** argv) {
 
 	DEBUG("Device started as STATION");
 
-	/* Remove any connection policies for working in transceiver mode */
+#define SL_SCAN_DISABLE 0
+	retVal = sl_WlanPolicySet(SL_POLICY_SCAN, SL_SCAN_DISABLE, NULL, 0);
+
+	if (retVal < 0) {
+		DEBUG("[ERROR] Failed to disable SL_POLICY_SCAN");
+		system("PAUSE");
+		return -1;
+	}
+	DEBUG("Default Active Scan is disabled");
+
 	retVal = sl_WlanPolicySet(SL_POLICY_CONNECTION,
 			SL_CONNECTION_POLICY(0, 0, 0, 0, 0), NULL, 0);
-	ASSERT_ON_ERROR(retVal);
-	DEBUG("Connection policies are cleared");
+
+	if (retVal < 0) {
+		DEBUG("[ERROR] Failed to clear WLAN_CONNECTION_POLICY");
+		system("PAUSE");
+		return -1;
+	}
+
+	retVal = sl_WlanDisconnect();
+
+	if (retVal == 0) {
+		DEBUG("Disconnected from AP");
+	} else {
+		// already disconnected
+	}
+	DEBUG("Connection policy is cleared and CC3100 has been disconnected");
 
 	DEBUG("Start Sniffer function");
 
@@ -410,19 +432,21 @@ void Sniffer(_i16 channel) {
 
 		radioHeader = (SlTransceiverRxOverHead_t *) buffer;
 
-		pcaprec_hdr_t pcapHeader = {
-			.ts_sec = 0,
-			.ts_usec = 0,
-			.incl_len = recievedBytes - sizeof(SlTransceiverRxOverHead_t) + sizeof(frame),
-			.orig_len = recievedBytes - sizeof(SlTransceiverRxOverHead_t) + sizeof(frame)
-		};
+#define MICROSECONDS_IN_SECOND (1000000)
+		pcaprec_hdr_t pcapHeader;
+		pcapHeader.ts_sec = radioHeader->timestamp / MICROSECONDS_IN_SECOND;
+		pcapHeader.ts_usec = radioHeader->timestamp % MICROSECONDS_IN_SECOND;
+		pcapHeader.incl_len = recievedBytes - sizeof(SlTransceiverRxOverHead_t)
+				+ sizeof(frame);
+		pcapHeader.orig_len = recievedBytes - sizeof(SlTransceiverRxOverHead_t)
+				+ sizeof(frame);
 
-		result = WriteFile(hPipe, &pcapHeader, sizeof(pcapHeader), &byteWritten, NULL);
+		result = WriteFile(hPipe, &pcapHeader, sizeof(pcapHeader), &byteWritten,
+		NULL);
 		if (result == FALSE) {
 			DEBUG("[ERROR] Failed to write pcapHeader");
 			exit(-1);
 		}
-
 
 		result = WriteFile(hPipe, &frame, sizeof(frame), &byteWritten, NULL);
 		if (result == FALSE) {
