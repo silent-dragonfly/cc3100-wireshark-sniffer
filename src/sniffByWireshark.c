@@ -79,7 +79,7 @@ int sniffByWireshark(_i16 channel) {
 
         if (recievedBytes < 0) {
             DEBUG("[ERROR] Recv: %d", recievedBytes);
-            return -1;
+            goto finally;
         }
 
         SlTransceiverRxOverHead_t * radioHeader = (SlTransceiverRxOverHead_t *) buffer;
@@ -98,7 +98,7 @@ int sniffByWireshark(_i16 channel) {
         result = WriteFile(hPipe, &pcapHeader, sizeof(pcapHeader), &byteWritten, NULL);
         if (result == FALSE) {
             DEBUG("[ERROR] Failed to write pcapRecordHeader_t");
-            return -1;
+            goto finally;
         }
 
         ieee80211RadiotapHeader_t radiotapHeader = {
@@ -108,7 +108,7 @@ int sniffByWireshark(_i16 channel) {
         result = WriteFile(hPipe, &radiotapHeader, sizeof(radiotapHeader), &byteWritten, NULL);
         if (result == FALSE) {
             DEBUG("[ERROR] Failed to write pcapRecordHeader_t");
-            return -1;
+            goto finally;
         }
 
         result = WriteFile(hPipe, &(buffer[sizeof(SlTransceiverRxOverHead_t)]),
@@ -116,9 +116,16 @@ int sniffByWireshark(_i16 channel) {
 
         if (result == FALSE) {
             DEBUG("[ERROR] Failed to write buffer");
-            return -1;
+            goto finally;
         }
     }
 
-    return sl_Close(SockID);
+    _i16 retVal;
+finally:
+    retVal = sl_Close(SockID);
+    if (retVal < 0) {
+        DEBUG("[ERROR]sl_Close: %d", retVal);
+        return -1;
+    }
+    return 0;
 }

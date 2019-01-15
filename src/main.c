@@ -51,32 +51,53 @@ int main(int argc, char** argv) {
         DEBUG("ERROR:addBeaconRxFilter: %d", retVal);
         return -1;
     }
-    DEBUG("Beacon RXFilter are set");
+    DEBUG("Beacon RXFilter added");
 
-    {
-        printf("\n## Rx Filters (sl_WlanRxFilterGet)\n");
-
-        _WlanRxFilterRetrieveEnableStatusCommandResponseBuff_t buf;
-        _i16 retVal = sl_WlanRxFilterGet(SL_FILTER_RETRIEVE_ENABLE_STATE, &buf,
-                sizeof(buf));
-        if (retVal < 0) {
-            DEBUG("Failed sl_WlanRxFilterGet: %d", retVal);
-            return -1;
-        }
-
-        printf("Enabled Filters: \n");
-        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[0]);
-        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[1]);
-        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[2]);
-        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[3]);
-    }
-
-    DEBUG("Starting sniffing");
-    const _i16 channel = 10; // 1-13
-    retVal = sniffByWireshark(channel);
+    retVal = enableBeaconRxFilter();
     if (retVal < 0) {
-        DEBUG("ERROR:sniffByWireshark: %d", retVal);
+        DEBUG("ERROR:switchBeaconRxFilter: %d", retVal);
         return -1;
     }
+    DEBUG("Filters are successfully enabled");
+
+    retVal = printRxFilterMask();
+    if (retVal < 0) {
+        DEBUG("ERROR:printRxFilterMask: %d", retVal);
+        return -1;
+    }
+
+    // Check in wireshark that there is only Beacon frames
+    DEBUG("Starting sniffing");
+    const _i16 channel = 10; // 1-13
+    sniffByWireshark(channel);
+
+    // restart tested here - helped
+
+    retVal = disableBeaconRxFilter();
+    if (retVal < 0) {
+        DEBUG("ERROR:switchBeaconRxFilter: %d", retVal);
+        return -1;
+    }
+    DEBUG("Filters are successfully disabled");
+
+    retVal = printRxFilterMask();
+    if (retVal < 0) {
+        DEBUG("ERROR:printRxFilterMask: %d", retVal);
+        return -1;
+    }
+
+    // restart tested here - helped
+    retVal = sl_Stop(SL_STOP_TIMEOUT);
+    ASSERT_ON_ERROR(retVal);
+    retVal = sl_Start(0, 0, 0);
+    if ((retVal < 0) || (ROLE_STA != retVal)) {
+        DEBUG(" Failed to start the device");
+        return -1;
+    }
+    DEBUG("Device re-started as STATION");
+
+    // Check in wireshark that now we are capturing the
+    sniffByWireshark(channel);
+
     return 0;
 }

@@ -16,6 +16,8 @@ typedef enum IEEE80211_MgmSubtypes_e {
     MGM_SUBTYPE_BEACON = 0x80,
 } IEEE80211_MgmSubtypes_e;
 
+static SlrxFilterIdMask_t FiltersIdMask;
+
 int addBeaconRxFilter()
 {
     /**
@@ -31,7 +33,6 @@ int addBeaconRxFilter()
     SlrxFilterRule_t Rule;
     SlrxFilterTrigger_t Trigger;
     SlrxFilterAction_t Action;
-    SlrxFilterIdMask_t FiltersIdMask;
 
     uint8_t FrameType;
     uint8_t FrameSubtype;
@@ -45,13 +46,15 @@ int addBeaconRxFilter()
     FrameTypeMask = 0xFF;
 
     Rule.HeaderType.RuleHeaderfield = FRAME_TYPE_FIELD;
-    memcpy(Rule.HeaderType.RuleHeaderArgsAndMask.RuleHeaderArgs.RxFilterDB1BytesRuleArgs[0], &FrameType, 1);
+    memcpy(Rule.HeaderType.RuleHeaderArgsAndMask.RuleHeaderArgs.RxFilterDB1BytesRuleArgs[0],
+            &FrameType, 1);
     memcpy(Rule.HeaderType.RuleHeaderArgsAndMask.RuleHeaderArgsMask, &FrameTypeMask, 1);
     Rule.HeaderType.RuleCompareFunc = COMPARE_FUNC_NOT_EQUAL_TO;
 
     Trigger.ParentFilterID = 0;
     Trigger.Trigger = NO_TRIGGER;
-    Trigger.TriggerArgConnectionState.IntRepresentation = RX_FILTER_CONNECTION_STATE_STA_NOT_CONNECTED;
+    Trigger.TriggerArgConnectionState.IntRepresentation =
+    RX_FILTER_CONNECTION_STATE_STA_NOT_CONNECTED;
     Trigger.TriggerArgRoleStatus.IntRepresentation = RX_FILTER_ROLE_PROMISCUOUS;
 
     Action.ActionType.IntRepresentation = RX_FILTER_ACTION_DROP;
@@ -82,7 +85,8 @@ int addBeaconRxFilter()
     Action.ActionType.IntRepresentation = RX_FILTER_ACTION_DROP;
     FrameSubtype = MGM_SUBTYPE_BEACON;
     Rule.HeaderType.RuleHeaderfield = FRAME_SUBTYPE_FIELD;
-    memcpy(Rule.HeaderType.RuleHeaderArgsAndMask.RuleHeaderArgs.RxFilterDB1BytesRuleArgs[0], &FrameSubtype, 1);
+    memcpy(Rule.HeaderType.RuleHeaderArgsAndMask.RuleHeaderArgs.RxFilterDB1BytesRuleArgs[0],
+            &FrameSubtype, 1);
 
     retVal = sl_WlanRxFilterAdd(RuleType, FilterFlags, &Rule, &Trigger, &Action, &FilterId);
     if (retVal != 0) {
@@ -93,17 +97,67 @@ int addBeaconRxFilter()
 
     SETBIT8(FiltersIdMask, FilterId);
 
+    return 0;
+}
+
+int enableBeaconRxFilter()
+{
+    SlrxFilterIdMask_t emptyFiltersIdMask = { 0, };
+    if (memcmp(emptyFiltersIdMask, FiltersIdMask, sizeof(SlrxFilterIdMask_t)) == 0) {
+        DEBUG("[ERROR] beacon filter was not created");
+        return -1;
+    }
 
     _WlanRxFilterOperationCommandBuff_t filterOperation;
     memset(&filterOperation, 0, sizeof(filterOperation));
     memcpy(filterOperation.FilterIdMask, FiltersIdMask, sizeof(FiltersIdMask));
 
-    retVal = sl_WlanRxFilterSet(SL_ENABLE_DISABLE_RX_FILTER , &filterOperation, sizeof(filterOperation));
-    if(retVal != 0) {
+    _i16 retVal = sl_WlanRxFilterSet(SL_ENABLE_DISABLE_RX_FILTER, &filterOperation,
+            sizeof(filterOperation));
+    if (retVal != 0) {
         DEBUG("[ERROR]sl_WlanRxFilterSet, retVal: %d", retVal);
         return -1;
     }
-    DEBUG("Filters are successfully enabled");
+    return 0;
+}
 
+int disableBeaconRxFilter()
+{
+    SlrxFilterIdMask_t emptyFiltersIdMask = { 0, };
+    if (memcmp(emptyFiltersIdMask, FiltersIdMask, sizeof(SlrxFilterIdMask_t)) == 0) {
+        DEBUG("[ERROR] beacon filter was not created");
+        return -1;
+    }
+
+    _WlanRxFilterOperationCommandBuff_t filterOperation;
+    memset(&filterOperation, 0, sizeof(filterOperation));
+    memcpy(filterOperation.FilterIdMask, emptyFiltersIdMask, sizeof(emptyFiltersIdMask));
+
+    _i16 retVal = sl_WlanRxFilterSet(SL_ENABLE_DISABLE_RX_FILTER, &filterOperation,
+            sizeof(filterOperation));
+    if (retVal != 0) {
+        DEBUG("[ERROR]sl_WlanRxFilterSet, retVal: %d", retVal);
+        return -1;
+    }
+    return 0;
+}
+
+int printRxFilterMask()
+{
+    printf("\n## Rx Filters (sl_WlanRxFilterGet)\n");
+
+    _WlanRxFilterRetrieveEnableStatusCommandResponseBuff_t buf;
+    _i16 retVal = sl_WlanRxFilterGet(SL_FILTER_RETRIEVE_ENABLE_STATE, &buf,
+            sizeof(buf));
+    if (retVal < 0) {
+        DEBUG("Failed sl_WlanRxFilterGet: %d", retVal);
+        return -1;
+    }
+
+    printf("Enabled Filters: \n");
+    printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[0]);
+    printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[1]);
+    printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[2]);
+    printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[3]);
     return 0;
 }
