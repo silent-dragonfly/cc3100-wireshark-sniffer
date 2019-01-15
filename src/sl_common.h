@@ -94,43 +94,43 @@
 typedef enum
 {
     STATUS_BIT_CONNECTION = 0, /* If this bit is:
-                                 *      1 in a 'status_variable', the device is connected to the AP
-                                 *      0 in a 'status_variable', the device is not connected to the AP
-                                 */
+     *      1 in a 'status_variable', the device is connected to the AP
+     *      0 in a 'status_variable', the device is not connected to the AP
+     */
 
     STATUS_BIT_STA_CONNECTED, /* If this bit is:
-                                 *      1 in a 'status_variable', client is connected to device
-                                 *      0 in a 'status_variable', client is not connected to device
-                                 */
+     *      1 in a 'status_variable', client is connected to device
+     *      0 in a 'status_variable', client is not connected to device
+     */
 
     STATUS_BIT_IP_ACQUIRED, /* If this bit is:
-                                 *      1 in a 'status_variable', the device has acquired an IP
-                                 *      0 in a 'status_variable', the device has not acquired an IP
-                                 */
+     *      1 in a 'status_variable', the device has acquired an IP
+     *      0 in a 'status_variable', the device has not acquired an IP
+     */
 
     STATUS_BIT_IP_LEASED, /* If this bit is:
-                                 *      1 in a 'status_variable', the device has leased an IP
-                                 *      0 in a 'status_variable', the device has not leased an IP
-                                 */
+     *      1 in a 'status_variable', the device has leased an IP
+     *      0 in a 'status_variable', the device has not leased an IP
+     */
 
     STATUS_BIT_CONNECTION_FAILED, /* If this bit is:
-                                     *      1 in a 'status_variable', failed to connect to device
-                                     *      0 in a 'status_variable'
-                                     */
+     *      1 in a 'status_variable', failed to connect to device
+     *      0 in a 'status_variable'
+     */
 
     STATUS_BIT_P2P_NEG_REQ_RECEIVED, /* If this bit is:
-                                     *      1 in a 'status_variable', connection requested by remote wifi-direct device
-                                     *      0 in a 'status_variable',
-                                     */
-    STATUS_BIT_SMARTCONFIG_DONE,     /* If this bit is:
-                                     *      1 in a 'status_variable', smartconfig completed
-                                     *      0 in a 'status_variable', smartconfig event couldn't complete
-                                     */
+     *      1 in a 'status_variable', connection requested by remote wifi-direct device
+     *      0 in a 'status_variable',
+     */
+    STATUS_BIT_SMARTCONFIG_DONE, /* If this bit is:
+     *      1 in a 'status_variable', smartconfig completed
+     *      0 in a 'status_variable', smartconfig event couldn't complete
+     */
 
     STATUS_BIT_SMARTCONFIG_STOPPED /* If this bit is:
-                                     *      1 in a 'status_variable', smartconfig process stopped
-                                     *      0 in a 'status_variable', smartconfig process running
-                                     */
+     *      1 in a 'status_variable', smartconfig process stopped
+     *      0 in a 'status_variable', smartconfig process running
+     */
 
 } e_StatusBits;
 

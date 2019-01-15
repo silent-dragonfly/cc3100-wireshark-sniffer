@@ -1,11 +1,15 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+#include <stdint.h>
+
 #include "simplelink.h"
 #include "sl_common.h"
 
 #include "helpers.h"
 #include "event_handlers.h"
+
+int sniffer(_i16 channel);
 
 // global variables
 #ifndef __MAIN_C__

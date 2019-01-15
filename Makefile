@@ -4,7 +4,7 @@ SIMPLE_LINK_PATH := simple-link
 
 APP_NAME := cc3100-wireshark-sniffer.exe
 VPATH = src:$(SIMPLE_LINK_PATH)/simple_link/source
-SRCS := src/main.c $(wildcard $(SIMPLE_LINK_PATH)/simple_link/source/*.c)
+SRCS := $(wildcard src/*.c) $(wildcard $(SIMPLE_LINK_PATH)/simple_link/source/*.c)
 
 CC := gcc
 

@@ -14,28 +14,28 @@ void initClk()
 
 void displayVersion()
 {
-    SlVersionFull ver = {0};
+    SlVersionFull ver = { 0 };
 
     _u8 configOpt = SL_DEVICE_GENERAL_VERSION;
     _u8 configLen = sizeof(ver);
-    _u8 retVal = sl_DevGet(SL_DEVICE_GENERAL_CONFIGURATION, &configOpt, &configLen, (_u8 *)(&ver));
+    _u8 retVal = sl_DevGet(SL_DEVICE_GENERAL_CONFIGURATION, &configOpt, &configLen, (_u8 *) (&ver));
     assert(retVal >= 0);
 
     DEBUG("NWP version: %d.%d.%d.%d",
-          ver.NwpVersion[0],
-          ver.NwpVersion[1],
-          ver.NwpVersion[2],
-          ver.NwpVersion[3]);
+            ver.NwpVersion[0],
+            ver.NwpVersion[1],
+            ver.NwpVersion[2],
+            ver.NwpVersion[3]);
     DEBUG("MAC version: %d.%d.%d.%d",
-          ver.ChipFwAndPhyVersion.FwVersion[0],
-          ver.ChipFwAndPhyVersion.FwVersion[1],
-          ver.ChipFwAndPhyVersion.FwVersion[2],
-          ver.ChipFwAndPhyVersion.FwVersion[3]);
+            ver.ChipFwAndPhyVersion.FwVersion[0],
+            ver.ChipFwAndPhyVersion.FwVersion[1],
+            ver.ChipFwAndPhyVersion.FwVersion[2],
+            ver.ChipFwAndPhyVersion.FwVersion[3]);
     DEBUG("PHY version: %d.%d.%d.%d",
-          ver.ChipFwAndPhyVersion.PhyVersion[0],
-          ver.ChipFwAndPhyVersion.PhyVersion[1],
-          ver.ChipFwAndPhyVersion.PhyVersion[2],
-          ver.ChipFwAndPhyVersion.PhyVersion[3]);
+            ver.ChipFwAndPhyVersion.PhyVersion[0],
+            ver.ChipFwAndPhyVersion.PhyVersion[1],
+            ver.ChipFwAndPhyVersion.PhyVersion[2],
+            ver.ChipFwAndPhyVersion.PhyVersion[3]);
 }
 
 _i32 initializeAppVariables()
@@ -56,25 +56,25 @@ void displayBanner()
 }
 
 /*!
-    \brief This function configure the SimpleLink device in its default state. It:
-           - Sets the mode to STATION
-           - Configures connection policy to Auto and AutoSmartConfig
-           - Deletes all the stored profiles
-           - Enables DHCP
-           - Disables Scan policy
-           - Sets Tx power to maximum
-           - Sets power policy to normal
-           - Unregisters mDNS services
-           - Remove all filters
+ \brief This function configure the SimpleLink device in its default state. It:
+ - Sets the mode to STATION
+ - Configures connection policy to Auto and AutoSmartConfig
+ - Deletes all the stored profiles
+ - Enables DHCP
+ - Disables Scan policy
+ - Sets Tx power to maximum
+ - Sets power policy to normal
+ - Unregisters mDNS services
+ - Remove all filters
 
-    \param[in]      none
+ \param[in]      none
 
-    \return         On success, zero is returned. On error, negative is returned
-*/
+ \return         On success, zero is returned. On error, negative is returned
+ */
 _i32 configureSimpleLinkToDefaultState()
 {
-    SlVersionFull ver = {0};
-    _WlanRxFilterOperationCommandBuff_t RxFilterIdMask = {0};
+    SlVersionFull ver = { 0 };
+    _WlanRxFilterOperationCommandBuff_t RxFilterIdMask = { 0 };
 
     _u8 val = 1;
     _u8 configOpt = 0;
@@ -89,9 +89,9 @@ _i32 configureSimpleLinkToDefaultState()
 
     /* If the device is not in station-mode, try configuring it in station-mode */
     if (ROLE_STA != mode)
-    {
+            {
         if (ROLE_AP == mode)
-        {
+                {
             /* If the device is in AP mode, we need to wait for this event before doing anything */
             while (!IS_IP_ACQUIRED(g_Status))
             {
@@ -111,7 +111,7 @@ _i32 configureSimpleLinkToDefaultState()
 
         /* Check if the device is in station again */
         if (ROLE_STA != retVal)
-        {
+                {
             /* We don't want to proceed if the device is not coming up in station-mode */
             ASSERT_ON_ERROR(DEVICE_NOT_IN_STATION_MODE);
         }
@@ -120,7 +120,7 @@ _i32 configureSimpleLinkToDefaultState()
     /* Get the device's version-information */
     configOpt = SL_DEVICE_GENERAL_VERSION;
     configLen = sizeof(ver);
-    retVal = sl_DevGet(SL_DEVICE_GENERAL_CONFIGURATION, &configOpt, &configLen, (_u8 *)(&ver));
+    retVal = sl_DevGet(SL_DEVICE_GENERAL_CONFIGURATION, &configOpt, &configLen, (_u8 *) (&ver));
     ASSERT_ON_ERROR(retVal);
 
     /* Set connection policy to Auto + SmartConfig (Device's default connection policy) */
@@ -138,7 +138,7 @@ _i32 configureSimpleLinkToDefaultState()
      */
     retVal = sl_WlanDisconnect();
     if (0 == retVal)
-    {
+            {
         /* Wait */
         while (IS_CONNECTED(g_Status))
         {
@@ -156,9 +156,10 @@ _i32 configureSimpleLinkToDefaultState()
     ASSERT_ON_ERROR(retVal);
 
     /* Set Tx power level for station mode
-       Number between 0-15, as dB offset from max power - 0 will set maximum power */
+     Number between 0-15, as dB offset from max power - 0 will set maximum power */
     power = 0;
-    retVal = sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID, WLAN_GENERAL_PARAM_OPT_STA_TX_POWER, 1, (_u8 *)&power);
+    retVal = sl_WlanSet(SL_WLAN_CFG_GENERAL_PARAM_ID, WLAN_GENERAL_PARAM_OPT_STA_TX_POWER, 1,
+            (_u8 *) &power);
     ASSERT_ON_ERROR(retVal);
 
     /* Set PM policy to normal */
@@ -171,8 +172,8 @@ _i32 configureSimpleLinkToDefaultState()
 
     /* Remove  all 64 filters (8*8) */
     pal_Memset(RxFilterIdMask.FilterIdMask, 0xFF, 8);
-    retVal = sl_WlanRxFilterSet(SL_REMOVE_RX_FILTER, (_u8 *)&RxFilterIdMask,
-                                sizeof(_WlanRxFilterOperationCommandBuff_t));
+    retVal = sl_WlanRxFilterSet(SL_REMOVE_RX_FILTER, (_u8 *) &RxFilterIdMask,
+            sizeof(_WlanRxFilterOperationCommandBuff_t));
     ASSERT_ON_ERROR(retVal);
 
     retVal = sl_Stop(SL_STOP_TIMEOUT);
@@ -186,15 +187,15 @@ _i32 configureSimpleLinkToDefaultState()
 
 _i32 establishConnectionWithAP()
 {
-    SlSecParams_t secParams = {0};
+    SlSecParams_t secParams = { 0 };
     _i32 retVal = 0;
 
-    secParams.Key = (_i8 *)PASSKEY;
+    secParams.Key = (_i8 *) PASSKEY;
     secParams.KeyLen = pal_Strlen(PASSKEY);
     secParams.Type = SEC_TYPE;
 
     DEBUG("Connect to %s", SSID_NAME);
-    retVal = sl_WlanConnect((_i8 *)SSID_NAME, pal_Strlen(SSID_NAME), 0, &secParams, 0);
+    retVal = sl_WlanConnect((_i8 *) SSID_NAME, pal_Strlen(SSID_NAME), 0, &secParams, 0);
     ASSERT_ON_ERROR(retVal);
 
     /* Wait */
@@ -215,8 +216,8 @@ _i32 establishConnectionWithAP()
 
 _i32 checkLanConnection()
 {
-    SlPingStartCommand_t pingParams = {0};
-    SlPingReport_t pingReport = {0};
+    SlPingStartCommand_t pingParams = { 0 };
+    SlPingReport_t pingReport = { 0 };
 
     _i32 retVal = -1;
 
@@ -232,8 +233,8 @@ _i32 checkLanConnection()
     pingParams.Ip = g_GatewayIP;
 
     /* Check for LAN connection */
-    retVal = sl_NetAppPingStart((SlPingStartCommand_t *)&pingParams, SL_AF_INET,
-                                (SlPingReport_t *)&pingReport, SimpleLinkPingReport);
+    retVal = sl_NetAppPingStart((SlPingStartCommand_t *) &pingParams, SL_AF_INET,
+            (SlPingReport_t *) &pingReport, SimpleLinkPingReport);
     ASSERT_ON_ERROR(retVal);
 
     /* Wait */
@@ -243,7 +244,7 @@ _i32 checkLanConnection()
     }
 
     if (0 == g_PingPacketsRecv)
-    {
+            {
         /* Problem with LAN connection */
         ASSERT_ON_ERROR(LAN_CONNECTION_FAILED);
     }
@@ -253,17 +254,17 @@ _i32 checkLanConnection()
 }
 
 /*!
-    \brief This function checks the internet connection by pinging
-           the external-host (HOST_NAME)
+ \brief This function checks the internet connection by pinging
+ the external-host (HOST_NAME)
 
-    \param[in]  None
+ \param[in]  None
 
-    \return     0 on success, negative error-code on error
-*/
+ \return     0 on success, negative error-code on error
+ */
 _i32 checkInternetConnection()
 {
-    SlPingStartCommand_t pingParams = {0};
-    SlPingReport_t pingReport = {0};
+    SlPingStartCommand_t pingParams = { 0 };
+    SlPingReport_t pingReport = { 0 };
 
     _u32 ipAddr = 0;
 
@@ -281,15 +282,16 @@ _i32 checkInternetConnection()
     pingParams.Ip = g_GatewayIP;
 
     /* Check for Internet connection */
-    retVal = sl_NetAppDnsGetHostByName((_i8 *)HOST_NAME, pal_Strlen(HOST_NAME), &ipAddr, SL_AF_INET);
+    retVal = sl_NetAppDnsGetHostByName((_i8 *) HOST_NAME, pal_Strlen(HOST_NAME), &ipAddr,
+            SL_AF_INET);
     ASSERT_ON_ERROR(retVal);
 
     /* Replace the ping address to match HOST_NAME's IP address */
     pingParams.Ip = ipAddr;
 
     /* Try to ping HOST_NAME */
-    retVal = sl_NetAppPingStart((SlPingStartCommand_t *)&pingParams, SL_AF_INET,
-                                (SlPingReport_t *)&pingReport, SimpleLinkPingReport);
+    retVal = sl_NetAppPingStart((SlPingStartCommand_t *) &pingParams, SL_AF_INET,
+            (SlPingReport_t *) &pingReport, SimpleLinkPingReport);
     ASSERT_ON_ERROR(retVal);
 
     /* Wait */
@@ -299,7 +301,7 @@ _i32 checkInternetConnection()
     }
 
     if (0 == g_PingPacketsRecv)
-    {
+            {
         /* Problem with internet connection*/
         ASSERT_ON_ERROR(INTERNET_CONNECTION_FAILED);
     }

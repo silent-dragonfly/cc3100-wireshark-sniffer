@@ -13,21 +13,21 @@
 
 void displayBanner();
 _i32 initializeAppVariables();
-//_i32 configureSimpleLinkToDefaultState();
+_i32 configureSimpleLinkToDefaultState();
 _i32 establishConnectionWithAP();
 _i32 checkLanConnection();
 _i32 checkInternetConnection();
 _i32 initializeAppVariables();
 
-//typedef enum
-//{
-//    /* Choosing this number to avoid overlap with host-driver's error codes */
-//    LAN_CONNECTION_FAILED = -0x7D0,
-//    INTERNET_CONNECTION_FAILED = LAN_CONNECTION_FAILED - 1,
-//    DEVICE_NOT_IN_STATION_MODE = INTERNET_CONNECTION_FAILED - 1,
-//
-//    STATUS_CODE_MAX = -0xBB8
-//} e_AppStatusCodes;
+typedef enum
+{
+    /* Choosing this number to avoid overlap with host-driver's error codes */
+    LAN_CONNECTION_FAILED = -0x7D0,
+    INTERNET_CONNECTION_FAILED = LAN_CONNECTION_FAILED - 1,
+    DEVICE_NOT_IN_STATION_MODE = INTERNET_CONNECTION_FAILED - 1,
+
+    STATUS_CODE_MAX = -0xBB8
+} e_AppStatusCodes;
 
 // User's definition
 #ifndef NDEBUG
