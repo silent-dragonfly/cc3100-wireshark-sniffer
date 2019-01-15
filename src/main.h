@@ -9,7 +9,9 @@
 #include "helpers.h"
 #include "event_handlers.h"
 
-int sniffer(_i16 channel);
+int addBeaconRxFilter();
+int sniffByWireshark(_i16 channel);
+
 
 // global variables
 #ifndef __MAIN_C__

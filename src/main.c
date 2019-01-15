@@ -45,12 +45,37 @@ int main(int argc, char** argv) {
         // already disconnected
     }
     DEBUG("Connection policy is cleared and CC3100 has been disconnected");
-    DEBUG("Start sniffing");
 
+    retVal = addBeaconRxFilter();
+    if (retVal < 0) {
+        DEBUG("ERROR:addBeaconRxFilter: %d", retVal);
+        return -1;
+    }
+    DEBUG("Beacon RXFilter are set");
+
+    {
+        printf("\n## Rx Filters (sl_WlanRxFilterGet)\n");
+
+        _WlanRxFilterRetrieveEnableStatusCommandResponseBuff_t buf;
+        _i16 retVal = sl_WlanRxFilterGet(SL_FILTER_RETRIEVE_ENABLE_STATE, &buf,
+                sizeof(buf));
+        if (retVal < 0) {
+            DEBUG("Failed sl_WlanRxFilterGet: %d", retVal);
+            return -1;
+        }
+
+        printf("Enabled Filters: \n");
+        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[0]);
+        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[1]);
+        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[2]);
+        printf("\t%08X\n", ((_u32*) &buf.FilterIdMask)[3]);
+    }
+
+    DEBUG("Starting sniffing");
     const _i16 channel = 10; // 1-13
     retVal = sniffByWireshark(channel);
     if (retVal < 0) {
-        DEBUG("ERROR:sniffByWireshark");
+        DEBUG("ERROR:sniffByWireshark: %d", retVal);
         return -1;
     }
     return 0;
